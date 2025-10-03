@@ -90,14 +90,37 @@
       margin: 20px 0;
       color: #ff8a00;
     }
+    /* Start Screen */
+    #startScreen {
+      background: url("YOUR_IMAGE.avif") no-repeat center center/cover;
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      color: white;
+    }
+    #startScreen input {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-top: 20px;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">Neura Quiz ⚡</div>
-    <div class="subtitle">Test your Neura Protocol knowledge</div>
+    <!-- Start Screen -->
+    <div id="startScreen">
+      <div class="logo">Neura Quiz ⚡</div>
+      <p>Enter your name to begin:</p>
+      <input type="text" id="playerName" placeholder="Your Name" />
+      <br>
+      <button class="btn" onclick="startQuiz()">Start Quiz</button>
+    </div>
 
-    <div id="quiz">
+    <!-- Quiz Screen -->
+    <div id="quiz" style="display:none;">
       <div class="question-counter"><span id="current">1</span>/<span id="total"></span></div>
       <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
       <div class="question" id="question"></div>
@@ -106,10 +129,14 @@
       <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>Next</button>
     </div>
 
+    <!-- Result Screen -->
     <div id="result" class="results" style="display:none;">
       <h2>Quiz Completed 🎉</h2>
       <div class="score" id="score"></div>
+      <p id="congrats"></p>
       <button class="btn" onclick="restartQuiz()">Restart</button>
+      <br><br>
+      <a id="twitterShare" target="_blank" class="btn">Share on Twitter</a>
     </div>
   </div>
 
@@ -127,10 +154,16 @@
       { question: "Which is NOT a revenue source?", options: ["RPCfi","MEV","Inflation emissions","Reserve yield"], correct: 2 }
     ];
 
-    let current = 0, score = 0;
+    let current = 0, score = 0, player = "";
 
-    document.getElementById("total").textContent = quizData.length;
-    loadQuestion();
+    function startQuiz() {
+      player = document.getElementById("playerName").value.trim();
+      if (!player) { alert("Please enter your name!"); return; }
+      document.getElementById("startScreen").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("total").textContent = quizData.length;
+      loadQuestion();
+    }
 
     function loadQuestion() {
       if (current >= quizData.length) return showResult();
@@ -161,22 +194,26 @@
       });
       const fb = document.getElementById("feedback");
       if (index === q.correct) { score++; fb.textContent = "✅ Correct!"; fb.className = "feedback correct"; }
-      else { fb.textContent = "❌ Incorrect! Correct: " + q.options[q.correct]; fb.className = "feedback incorrect"; }
+      else { fb.textContent = "❌ Wrong! Correct: " + q.options[q.correct]; fb.className = "feedback incorrect"; }
       fb.style.display = "block";
       document.getElementById("nextBtn").disabled = false;
     }
 
     function nextQuestion() { current++; loadQuestion(); }
+
     function showResult() {
       document.getElementById("quiz").style.display = "none";
       document.getElementById("result").style.display = "block";
-      document.getElementById("score").textContent = `You scored ${score}/${quizData.length}`;
+      document.getElementById("score").textContent = `${player}, you scored ${score}/${quizData.length}`;
+      document.getElementById("congrats").textContent = score >= 7 ? "🔥 Awesome work!" : "Keep practicing 💪";
+      let tweet = `I just scored ${score}/${quizData.length} on the Neura Protocol Quiz! 🚀⚡ #NeuraQuiz`;
+      document.getElementById("twitterShare").href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`;
     }
+
     function restartQuiz() {
       current = 0; score = 0;
-      document.getElementById("quiz").style.display = "block";
       document.getElementById("result").style.display = "none";
-      loadQuestion();
+      document.getElementById("startScreen").style.display = "block";
     }
   </script>
 </body>
